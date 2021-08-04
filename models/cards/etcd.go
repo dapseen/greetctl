@@ -2,7 +2,7 @@ package cards
 
 import (
 	"context"
-	"log"
+	"fmt"
 	"time"
 
 	clientv3 "go.etcd.io/etcd/client/v3"
@@ -55,7 +55,7 @@ func CreateAndPersist(config Config) {
 		println(cancel)
 	}
 
-	log.Fatal(resp)
+	fmt.Printf("updated records: %v", resp.Header.Revision)
 
 }
 
