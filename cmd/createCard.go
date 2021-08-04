@@ -17,7 +17,6 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/dapseen/greetctl/models/cards"
 	"github.com/spf13/cobra"
@@ -32,8 +31,7 @@ var createCardCmd = &cobra.Command{
 	greetctl create card bob --name="Bob Marley" --occasion=birthday`,
 	Run: func(cmd *cobra.Command, args []string) {
 		cardID := args[0]
-		file, err := os.Create(".db/" + cardID)
-		defer file.Close()
+
 		occasion, err := cmd.Flags().GetString("occasion")
 		if err != nil {
 			fmt.Println(err)
@@ -56,7 +54,7 @@ var createCardCmd = &cobra.Command{
 			CardID:   cardID,
 		}
 
-		cards.CreateAndSaveCard(config)
+		cards.CreateAndPersist(config)
 	},
 }
 
