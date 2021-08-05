@@ -30,7 +30,7 @@ var getCardCmd = &cobra.Command{
 	greetctl get card eva`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) > 0 {
-			cards.FetchCardById(args[0])
+			cards.FetchCard(args[0])
 		} else {
 			cards.FetchAllCards()
 		}

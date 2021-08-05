@@ -52,7 +52,7 @@ func CreateAndSaveCard(config Config) {
 
 func FetchCardById(id string) {
 	data, _ := ioutil.ReadFile(getHomeDir() + "/" + id)
-	fmt.Printf("%s\n", data)
+	fmt.Printf("Data: %s\n", data)
 }
 
 func FetchAllCards() {

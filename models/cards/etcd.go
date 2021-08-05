@@ -49,16 +49,46 @@ func CreateAndPersist(config Config) {
 	defer cli.Close()
 
 	ctx, cancel := context.WithTimeout(context.Background(), requestTimeout)
-	resp, _ := cli.Put(ctx, cardID, greeting)
 
 	if cancel != nil {
 		println(cancel)
 	}
+	resp, _ := cli.Put(ctx, cardID, greeting)
 
 	fmt.Printf("updated records: %v", resp.Header.Revision)
 
 }
 
 //fetch single record
+
+func FetchCard(id string) {
+	var (
+		timeout        = 2 * time.Second
+		requestTimeout = 10 * time.Second
+	)
+
+	cli, err := clientv3.New(clientv3.Config{
+		Endpoints:   []string{"localhost:2379", "localhost:22379", "localhost:32379"},
+		DialTimeout: timeout,
+	})
+	if err != nil {
+		println(err)
+	}
+
+	defer cli.Close()
+
+	ctx, cancel := context.WithTimeout(context.Background(), requestTimeout)
+
+	if cancel != nil {
+		println(cancel)
+	}
+
+	resp, _ := cli.Get(ctx, id)
+
+	fetch := string(resp.Kvs[0].Value)
+
+	fmt.Println("Fetch Cards succefully: ", fetch)
+
+}
 
 ///fetch all records
