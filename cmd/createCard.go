@@ -16,11 +16,14 @@ limitations under the License.
 package cmd
 
 import (
+	"context"
 	"fmt"
-	"os"
+	"time"
 
+	"github.com/dapseen/greetctl/common/util"
 	"github.com/dapseen/greetctl/models/cards"
 	"github.com/spf13/cobra"
+	clientv3 "go.etcd.io/etcd/client/v3"
 )
 
 // createCardCmd represents the createCard command
@@ -32,8 +35,7 @@ var createCardCmd = &cobra.Command{
 	greetctl create card bob --name="Bob Marley" --occasion=birthday`,
 	Run: func(cmd *cobra.Command, args []string) {
 		cardID := args[0]
-		file, err := os.Create(".db/" + cardID)
-		defer file.Close()
+
 		occasion, err := cmd.Flags().GetString("occasion")
 		if err != nil {
 			fmt.Println(err)
@@ -56,7 +58,30 @@ var createCardCmd = &cobra.Command{
 			CardID:   cardID,
 		}
 
-		cards.CreateAndSaveCard(config)
+		//Connection
+		var (
+			timeout        = 2 * time.Second
+			requestTimeout = 10 * time.Second
+			PORT           = util.GetEnv("PORT")
+			URI            = util.GetEnv("URI")
+		)
+
+		ctx, _ := context.WithTimeout(context.Background(), requestTimeout)
+
+		cli, err := clientv3.New(clientv3.Config{
+			Endpoints:   []string{URI + ":" + PORT},
+			DialTimeout: timeout,
+		})
+
+		key := clientv3.NewKV(cli)
+
+		if err != nil {
+			println(err)
+		}
+
+		defer cli.Close()
+
+		cards.CreateAndPersist(config, key, ctx)
 	},
 }
 

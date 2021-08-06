@@ -16,8 +16,12 @@ limitations under the License.
 package cmd
 
 import (
+	"context"
+	"time"
+
 	"github.com/dapseen/greetctl/models/cards"
 	"github.com/spf13/cobra"
+	clientv3 "go.etcd.io/etcd/client/v3"
 )
 
 // getCardCmd represents the getCard command
@@ -29,8 +33,29 @@ var getCardCmd = &cobra.Command{
 	greetctl create card eva -n="Eva Green" -o=thanksgiving -l=fr
 	greetctl get card eva`,
 	Run: func(cmd *cobra.Command, args []string) {
+
+		//Connection
+		var (
+			timeout        = 2 * time.Second
+			requestTimeout = 10 * time.Second
+		)
+
+		ctx, cancel := context.WithTimeout(context.Background(), requestTimeout)
+		defer cancel()
+		cli, err := clientv3.New(clientv3.Config{
+			Endpoints:   []string{"localhost:2379", "localhost:22379", "localhost:32379"},
+			DialTimeout: timeout,
+		})
+
+		key := clientv3.NewKV(cli)
+
+		if err != nil {
+			println(err)
+		}
+
+		defer cli.Close()
 		if len(args) > 0 {
-			cards.FetchCardById(args[0])
+			cards.FetchCard(args[0], key, ctx)
 		} else {
 			cards.FetchAllCards()
 		}
