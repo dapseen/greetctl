@@ -3,7 +3,6 @@ package cards
 import (
 	"context"
 	"fmt"
-	"time"
 
 	clientv3 "go.etcd.io/etcd/client/v3"
 )
@@ -11,11 +10,7 @@ import (
 //get etcd connection
 
 //create and persist to etcd
-func CreateAndPersist(config Config) {
-	var (
-		timeout        = 2 * time.Second
-		requestTimeout = 10 * time.Second
-	)
+func CreateAndPersist(config Config, key clientv3.KV, ctx context.Context) {
 
 	cardID := config.CardID
 	occasion := config.Occasion
@@ -38,22 +33,7 @@ func CreateAndPersist(config Config) {
 		greeting = bDayGreetingFR + name
 	}
 
-	cli, err := clientv3.New(clientv3.Config{
-		Endpoints:   []string{"localhost:2379", "localhost:22379", "localhost:32379"},
-		DialTimeout: timeout,
-	})
-	if err != nil {
-		println(err)
-	}
-
-	defer cli.Close()
-
-	ctx, cancel := context.WithTimeout(context.Background(), requestTimeout)
-
-	if cancel != nil {
-		println(cancel)
-	}
-	resp, _ := cli.Put(ctx, cardID, greeting)
+	resp, _ := key.Put(ctx, cardID, greeting)
 
 	fmt.Printf("updated records: %v", resp.Header.Revision)
 
@@ -61,29 +41,9 @@ func CreateAndPersist(config Config) {
 
 //fetch single record
 
-func FetchCard(id string) {
-	var (
-		timeout        = 2 * time.Second
-		requestTimeout = 10 * time.Second
-	)
+func FetchCard(id string, key clientv3.KV, ctx context.Context) {
 
-	cli, err := clientv3.New(clientv3.Config{
-		Endpoints:   []string{"localhost:2379", "localhost:22379", "localhost:32379"},
-		DialTimeout: timeout,
-	})
-	if err != nil {
-		println(err)
-	}
-
-	defer cli.Close()
-
-	ctx, cancel := context.WithTimeout(context.Background(), requestTimeout)
-
-	if cancel != nil {
-		println(cancel)
-	}
-
-	resp, _ := cli.Get(ctx, id)
+	resp, _ := key.Get(ctx, id)
 
 	fetch := string(resp.Kvs[0].Value)
 
