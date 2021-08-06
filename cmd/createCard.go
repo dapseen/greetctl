@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/dapseen/greetctl/common/util"
 	"github.com/dapseen/greetctl/models/cards"
 	"github.com/spf13/cobra"
 	clientv3 "go.etcd.io/etcd/client/v3"
@@ -61,12 +62,14 @@ var createCardCmd = &cobra.Command{
 		var (
 			timeout        = 2 * time.Second
 			requestTimeout = 10 * time.Second
+			PORT           = util.GetEnv("PORT")
+			URI            = util.GetEnv("URI")
 		)
 
 		ctx, _ := context.WithTimeout(context.Background(), requestTimeout)
 
 		cli, err := clientv3.New(clientv3.Config{
-			Endpoints:   []string{"localhost:2379", "localhost:22379", "localhost:32379"},
+			Endpoints:   []string{URI + ":" + PORT},
 			DialTimeout: timeout,
 		})
 
